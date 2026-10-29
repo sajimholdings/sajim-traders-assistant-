@@ -1,0 +1,30 @@
+risk:
+  risk_percent: 4
+  target_rr: 3
+  min_rr: 1.5
+  max_lot_size: 10
+  max_risk_dollars: 1000
+spread:
+  max_spread_pips: 100
+  spread_warn_pips: 3.0
+  adjust_sl_for_spread: true
+  adjust_tp_for_spread: true
+mt5:
+  terminal_path: null
+  login: null
+  password: null
+  server: null
+trade:
+  magic_number: 234000
+  deviation: 20
+  comment: AI-Assistant
+notion:
+  enabled: true
+  attach_screenshot: true
+vision:
+  model: gemini-3.6-flash
+  thinking_level: low
+  fallback_models:
+  - gemini-3.5-flash
+  - gemini-3.8-flash
+  timeout_seconds: 20

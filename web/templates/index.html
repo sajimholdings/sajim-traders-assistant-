@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trade Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🤖 AI Trade Assistant</h1>
+                <p class="subtitle">Drop your chart — I'll handle the rest</p>
+            </div>
+            <div class="header-right">
+                <div class="mt5-status" id="mt5Status">
+                    <span class="status-dot offline"></span>
+                    <span class="status-text">MT5 Offline</span>
+                </div>
+                <div class="account-info" id="accountInfo" style="display:none;">
+                    <span class="balance" id="balance">$0.00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Where trades are logged -->
+        <div class="journal-bar" id="journalBar">
+            <div class="journal-item" id="journalNotion">
+                <span class="status-dot offline"></span>
+                <span>📓 Notion: <span class="journal-text">checking…</span></span>
+            </div>
+            <div class="journal-item" id="journalCsv">
+                <span class="status-dot offline"></span>
+                <span>📄 Local log: <span class="journal-text">checking…</span></span>
+            </div>
+        </div>
+
+        <!-- Settings Panel (collapsible) -->
+        <div class="settings-toggle" id="settingsToggle">
+            ⚙️ Risk Settings
+            <span class="toggle-arrow">▼</span>
+        </div>
+        <div class="settings" id="settingsPanel" style="display:none;">
+            <div class="setting-group">
+                <label for="riskPct">Risk %</label>
+                <input type="number" id="riskPct" value="1.0"
+                       step="0.1" min="0.1" max="10">
+            </div>
+            <div class="setting-group">
+                <label for="targetRR">Target RR</label>
+                <input type="number" id="targetRR" value="3.0"
+                       step="0.5" min="1">
+            </div>
+            <div class="setting-group">
+                <label for="minRR">Min RR</label>
+                <input type="number" id="minRR" value="1.5"
+                       step="0.5" min="0.5">
+            </div>
+            <div class="setting-group">
+                <label for="maxSpread">Max Spread (pips)</label>
+                <input type="number" id="maxSpread" value="5.0"
+                       step="0.5" min="0.5">
+            </div>
+            <div class="setting-group">
+                <label for="maxLots">Max Lots</label>
+                <input type="number" id="maxLots" value="10.0"
+                       step="0.5" min="0.01">
+            </div>
+            <div class="setting-group save-group">
+                <button class="btn-save" id="btnSaveSettings">
+                    💾 Save Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">📸</div>
+            <p class="drop-title">
+                Drag & drop your TradingView screenshot
+            </p>
+            <p class="drop-hint">or click to browse files</p>
+            <input type="file" id="fileInput" accept="image/*"
+                   style="display:none;">
+        </div>
+
+        <!-- Preview (shows the uploaded screenshot) -->
+        <div class="preview-container" id="previewContainer"
+             style="display:none;">
+            <img id="previewImage" alt="Chart preview">
+        </div>
+
+        <!-- Loader -->
+        <div class="loader" id="loader" style="display:none;">
+            <div class="spinner"></div>
+            <p>🧠 Analyzing your setup...</p>
+        </div>
+
+        <!-- Trade Card (shown after analysis) -->
+        <div class="trade-card" id="tradeCard" style="display:none;">
+
+            <!-- Header row -->
+            <div class="trade-header">
+                <div class="trade-header-left">
+                    <span class="pair-badge" id="pairBadge">—</span>
+                    <span class="order-type-badge" id="orderTypeBadge">
+                        MARKET
+                    </span>
+                </div>
+                <span id="directionBadge" class="direction-buy">
+                    ▲ BUY
+                </span>
+            </div>
+
+            <!-- AI confidence -->
+            <div class="confidence-bar" id="confidenceBar">
+                <span>AI Confidence:</span>
+                <div class="bar-track">
+                    <div class="bar-fill" id="confidenceFill"></div>
+                </div>
+                <span id="confidenceVal">0%</span>
+            </div>
+
+            <!-- Spread warning -->
+            <div class="warning" id="spreadWarning" style="display:none;">
+            </div>
+
+            <!-- Trade stats grid -->
+            <div class="trade-grid">
+                <div class="trade-stat">
+                    <div class="label">Entry</div>
+                    <div class="value" id="entryVal">—</div>
+                    <div class="sub" id="entrySub"></div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">Stop Loss</div>
+                    <div class="value sl-color" id="slVal">—</div>
+                    <div class="sub" id="slSub"></div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">Take Profit</div>
+                    <div class="value tp-color" id="tpVal">—</div>
+                    <div class="sub" id="tpSub"></div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">RR Ratio</div>
+                    <div class="value rr-color" id="rrVal">—</div>
+                    <div class="sub" id="rrSub"></div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">Lot Size</div>
+                    <div class="value" id="lotVal">—</div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">Risk</div>
+                    <div class="value" id="riskVal">—</div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">Spread</div>
+                    <div class="value" id="spreadVal">—</div>
+                </div>
+                <div class="trade-stat">
+                    <div class="label">Potential Profit</div>
+                    <div class="value tp-color" id="profitVal">—</div>
+                </div>
+            </div>
+
+            <!-- AI Notes -->
+            <div class="ai-notes" id="aiNotes" style="display:none;">
+                <span class="notes-label">📝 AI Notes:</span>
+                <span class="notes-text" id="aiNotesText"></span>
+            </div>
+
+            <!-- Action buttons -->
+            <button class="btn-execute" id="btnExecute">
+                🚀 Place Trade
+            </button>
+            <button class="btn-reject" id="btnReject">
+                ✕ Cancel
+            </button>
+        </div>
+
+        <!-- Result message -->
+        <div class="result" id="resultBox" style="display:none;"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Log</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container journal-container">
+        <header class="header">
+            <div class="header-left">
+                <h1>📄 Local Trade Log</h1>
+                <p class="subtitle">{{ rows|length }} entries · newest first · <code>{{ path }}</code></p>
+            </div>
+            <div class="header-right journal-links">
+                <a href="/">← Back</a>
+                <a href="/api/journal/csv">⬇ Download CSV</a>
+            </div>
+        </header>
+
+        {% if not rows %}
+            <p class="journal-empty">Nothing logged yet — analyze a screenshot to start.</p>
+        {% else %}
+        <div class="journal-table-wrap">
+            <table class="journal-table">
+                <thead>
+                    <tr>
+                        <th>Time</th><th>Event</th><th>Symbol</th><th>Side</th>
+                        <th>Type</th><th>Entry</th><th>SL</th><th>TP</th>
+                        <th>RR</th><th>Lots</th><th>Ticket</th><th>Exit</th>
+                        <th>P&amp;L</th><th>Result</th><th>Message</th><th>Notion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for r in rows %}
+                    <tr>
+                        <td class="nowrap">{{ r.timestamp|replace("T", " ") }}</td>
+                        <td><span class="ev ev-{{ r.event|lower }}">{{ r.event }}</span></td>
+                        <td>{{ r.symbol }}</td>
+                        <td>{{ r.direction }}</td>
+                        <td>{{ r.order_type }}</td>
+                        <td>{{ r.entry }}</td>
+                        <td>{{ r.sl }}</td>
+                        <td>{{ r.tp }}</td>
+                        <td>{{ r.rr }}</td>
+                        <td>{{ r.lot_size }}</td>
+                        <td>{{ r.ticket }}</td>
+                        <td>{{ r.exit_price }}</td>
+                        <td class="{% if r.pnl and r.pnl|float > 0 %}tp-color{% elif r.pnl and r.pnl|float < 0 %}sl-color{% endif %}">{{ r.pnl }}</td>
+                        <td>{{ r.result }}</td>
+                        <td class="msg">{{ r.message }}</td>
+                        <td>{% if r.notion_url %}<a href="{{ r.notion_url }}" target="_blank" rel="noopener">open ↗</a>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
